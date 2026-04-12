@@ -1,98 +1,76 @@
 import chainlit as cl
+from chainlit.utils import make_async 
 from agent_supervisor import supervisor
-from memory_manager import memory_manager
+from memory_manager import MemoryManager
 
 @cl.on_chat_start
 async def start():
-    """Initialisation de la session"""
-    session_id = cl.user_session.get("id")
-    
+    """Initialisation de la session avec un accueil professionnel"""
     await cl.Message(
-        content="""👋 **Bienvenue sur l'Assistant Intelligent Multi-Compétences !**
+        content="""👋 **Bienvenue sur Hémo-Expert Pro**
 
-Je peux vous aider de 3 façons:
-1. 📚 **Questions sur documents internes** (politiques, manuels, rapports)
-2. 🛠️ **Actions** (calculs, météo, recherche web, todo list)
-3. 💬 **Conversation générale**
+Je vous assiste dans vos décisions cliniques via :
+1. 📚 **Analyse de documents** (HAS, SFH, Protocoles)
+2. 🛠️ **Outils Cliniques** (Calculs de scores, dosages)
+3. 💬 **Différenciation diagnostique**
 
-
-_Développé avec LangChain & RAG_""",
-        author="Assistant"
+*Posez votre question ci-dessous.*""",
+        author="Système"
     ).send()
-    
-    # Stockage du session_id
-    cl.user_session.set("session_id", session_id)
 
 @cl.on_message
 async def main(message: cl.Message):
-    """Gestion des messages"""
-    session_id = cl.user_session.get("session_id")
+    """Gestion des messages avec suivi des étapes de réflexion"""
+    session_id = cl.user_session.get("id")
     user_input = message.content
     
-    # Indicateur de chargement
-    msg = cl.Message(content="")
-    await msg.send()
-    
-    try:
-        # Traitement par le superviseur
-        result = supervisor.process(user_input, session_id)
-        
-        # Construction de la réponse
-        output = result["output"]
-        
-        # Ajout des sources si présentes (RAG)
-        if result.get("citations"):
-            sources_text = "\n\n---\n📚 **Sources consultées:**\n"
-            for i, citation in enumerate(result["citations"][:3], 1):
-                sources_text += f"{i}. {citation['source']} (p.{citation['page']})\n"
-            output += sources_text
-        
-        # Badge indiquant le type de traitement
-        route_badge = {
-            "document": "📚 RAG",
-            "tool": "🛠️ Outils",
-            "chat": "💬 Conversation",
-            "error": "❌ Erreur"
-        }.get(result["route_type"], "❓")
-        
-        msg.content = f"{output}\n\n*{route_badge} (confiance: {result['confidence']:.0%})*"
-        await msg.update()
-        
-        # Ajout d'actions si RAG vide
-        if result["route_type"] == "document" and not result.get("sources"):
-            actions = [
-                cl.Action(
-                    name="web_search",
-                    value=user_input,
-                    description="🔍 Rechercher sur internet",
-                    label="Rechercher en ligne"
-                )
-            ]
-            msg.actions = actions
-            await msg.update()
+    # On crée une étape "Pensée" pour l'ergonomie
+    async with cl.Step(name="Hémo-Expert réfléchit...") as step:
+        try:
+            # On rend l'appel au superviseur asynchrone pour ne pas geler l'UI
+            # result = await make_async(supervisor.process)(user_input, session_id)
+            # Si supervisor est déjà asynchrone, utilisez simplement :
+            result = await supervisor.process(user_input, session_id)
             
-    except Exception as e:
-        msg.content = f"❌ Erreur: {str(e)}"
-        await msg.update()
+            output = result.get("output", "Désolé, je n'ai pas pu générer de réponse.")
+            
+            # Gestion des sources (uniformisation sur la clé 'citations')
+            citations = result.get("citations", [])
+            if citations:
+                sources_text = "\n\n---\n📚 **Sources consultées :**\n"
+                for i, c in enumerate(citations[:3], 1):
+                    sources_text += f"{i}. {c['source']} (p.{c.get('page', 'NC')})\n"
+                output += sources_text
+
+            # Badge de confiance
+            route = result.get("route_type", "chat")
+            conf = result.get("confidence", 0)
+            route_badge = {"document": "📚 RAG", "tool": "🛠️ Outils", "chat": "💬 Chat"}.get(route, "❓")
+            
+            final_content = f"{output}\n\n*{route_badge} | Fiabilité : {conf:.0%}*"
+            
+            # Envoi de la réponse finale
+            msg = cl.Message(content=final_content)
+            
+            # Ajout d'une action suggérée si le RAG est vide sur une question doc
+            if route == "document" and not citations:
+                msg.actions = [
+                    cl.Action(name="web_search", value=user_input, label="🔍 Chercher sur le Web")
+                ]
+            
+            await msg.send()
+            
+        except Exception as e:
+            await cl.Message(content=f"❌ Erreur lors du traitement : {str(e)}").send()
 
 @cl.action_callback("web_search")
-async def on_action(action):
-    """Callback pour l'action de recherche web"""
-    session_id = cl.user_session.get("session_id")
+async def on_action(action: cl.Action):
+    """Recherche web de secours via Tavily"""
+    from tools_extended import web_search # Assure-toi que cet outil est prêt
+    
     query = action.value
+    await cl.Message(content=f"🔍 *Extension de la recherche sur internet pour : {query}*").send()
     
-    await cl.Message(content=f"🔍 Recherche web pour: *{query}*...").send()
-    
-    # Forcer l'utilisation du tool web_search
-    from tools_extended import web_search
-    result = web_search.invoke(query)
-    
-    await cl.Message(content=result).send()
-
-@cl.on_chat_end
-async def end():
-    """Cleanup si nécessaire"""
-    pass
-
-if __name__ == "__main__":
-    pass
+    # Exécution de la recherche web
+    result = await make_async(web_search.invoke)(query)
+    await cl.Message(content=f"**Résultats du web :**\n{result}").send()
