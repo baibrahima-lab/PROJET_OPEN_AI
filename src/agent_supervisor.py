@@ -31,7 +31,7 @@ class SupervisorAgent:
             MessagesPlaceholder(variable_name="agent_scratchpad"),
         ])
         
-        # CORRECTION ICI : create_tool_calling_agent
+        # 4. Initialisation de l'Agent
         agent = create_tool_calling_agent(self.llm, tools, prompt)
         
         return AgentExecutor(

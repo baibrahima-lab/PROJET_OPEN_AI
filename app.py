@@ -1,11 +1,10 @@
 import chainlit as cl
 import asyncio
-# On n'importe PAS supervisor ici au top-level
+
 
 @cl.on_chat_start
 async def start():
     """Initialisation différée pour éviter le crash au démarrage sur Render"""
-    # IMPORT LOCAL : On attend que la boucle asyncio soit active
     from src.agent_supervisor import supervisor
     from src.tools import web_search
     

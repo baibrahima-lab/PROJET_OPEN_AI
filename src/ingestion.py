@@ -46,7 +46,7 @@ def ingest_documents(data_path=None, persist_directory=None, clear_existing=True
     if clear_existing:
         clean_vectorstore_folder(str(persist_directory))
 
-    # 🔴 Libération mémoire préventive
+    # 🔴 Libération mémoire 
     gc.collect()
 
     if not data_path.exists():
@@ -128,7 +128,7 @@ def ingest_documents(data_path=None, persist_directory=None, clear_existing=True
     print(f"📍 Dossier : {persist_directory}")
     print(f"🔢 Total fragments indexés : {vectorstore._collection.count()}")
 
-    # 🔒 5. Libération propre
+    # 🔒 5. Libération 
     vectorstore.persist()
     vectorstore = None
     gc.collect()

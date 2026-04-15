@@ -23,7 +23,7 @@ class SemanticRouter:
     def __init__(self):
         self.llm = ChatOpenAI(
             model=CONFIG.MODEL_NAME, 
-            temperature=0, # Crucial pour la stabilité du format JSON
+            temperature=0, # Pour la stabilité du format JSON
             api_key=CONFIG.OPENAI_API_KEY
         )
         

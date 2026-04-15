@@ -8,7 +8,7 @@ services:
       dockerfile: Dockerfile
     container_name: hemo-expert-app
     ports:
-      - "8002:8002"  # Host:Container (l'app écoute sur 8000 dans le container)
+      - "8002:8002"  # Host:Container (l'app écoute sur 8002 dans le container)
     env_file:
       - .env
     environment:
@@ -16,12 +16,12 @@ services:
       - PYTHONUNBUFFERED=1
       - CHAINLIT_SERVER_HOST=0.0.0.0
     volumes:
-      - ./data:/app/data:ro                    # Read-only (sécurité)
+      - ./data:/app/data:ro                    # Read-only 
       - ./vectorstore:/app/vectorstore         # Persistance ChromaDB
       - ./memory_sessions:/app/memory_sessions # Persistance mémoire
       - ./logs:/app/logs                       # Logs persistants
-      # Ne PAS monter todo_list.txt directement (créé dynamiquement)
-    restart: unless-stopped  # ✅ Mieux que 'always' (peut être arrêté manuellement)
+      
+    restart: unless-stopped  
     healthcheck:
       test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000')"]
       interval: 30s
@@ -31,7 +31,7 @@ services:
     networks:
       - hemo-network
 
-  # Service optionnel - Ingestion (one-shot)
+  # Service Ingestion (one-shot)
   # Utilisation : docker-compose run --rm ingestion
   ingestion:
     build: .
@@ -42,12 +42,12 @@ services:
       - PYTHONPATH=/app
     volumes:
       - ./data:/app/data:ro
-      - ./vectorstore:/app/vectorstore  # Écriture autorisée
+      - ./vectorstore:/app/vectorstore  
     command: >
       sh -c "echo 'Attente ChromaDB...' && 
              python -c 'from src.ingestion import ingest_documents; ingest_documents()' && 
              echo '✅ Ingestion terminée'"
-    profiles: ["ingest"]  # Ne démarre pas avec 'docker-compose up'
+    profiles: ["ingest"]  
     networks:
       - hemo-network
 

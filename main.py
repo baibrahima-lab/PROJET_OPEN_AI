@@ -14,7 +14,6 @@ logger = logging.getLogger(__name__)
 
 async def cli_mode():
     """Mode interactif en ligne de commande avec support asynchrone."""
-    # IMPORT LOCAL : On ne charge l'agent que si on entre en mode CLI
     from src.agent_supervisor import supervisor
     from src.memory_manager import memory_manager
     
@@ -47,7 +46,7 @@ async def cli_mode():
             # Affichage de la réponse
             print(f"\n🤖 Hémo-Expert :\n{result['output']}")
             
-            # Logs de routage pour le développeur
+            # Logs de routage 
             route = result.get('route_type', 'unknown')
             conf = result.get('confidence', 0)
             print(f"\n--- [Log: Route={route} | Confidence={conf:.0%}] ---")
@@ -77,7 +76,7 @@ def main():
     args = parser.parse_args()
     
     if args.ingest:
-        # IMPORT LOCAL : On ne charge le script d'ingestion que si nécessaire
+        # On ne charge le script d'ingestion que si nécessaire
         # Cela évite de verrouiller la base de données au démarrage du main
         from src.ingestion import ingest_documents
         print("📥 [Ingestion] Analyse et indexation des référentiels...")
@@ -86,7 +85,6 @@ def main():
     elif args.web:
         print(f"🚀 [Web] Lancement de l'interface sur http://localhost:{args.port}")
         try:
-            # Chainlit tourne dans son propre processus, aucun conflit d'import ici
             subprocess.run(["chainlit", "run", "app.py", "--port", str(args.port)], check=True)
         except KeyboardInterrupt:
             print("\nServeur arrêté.")

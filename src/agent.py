@@ -1,9 +1,6 @@
 import logging
 from langchain_openai import ChatOpenAI
-try:
-    from langchain_openai import create_openai_tools_agent
-except ImportError:
-    from langchain.agents import create_openai_tools_agent
+from langchain.agents import AgentExecutor, create_openai_tools_agent
 from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder
 from src.config import CONFIG 
 from src.tools import tools 
@@ -41,10 +38,9 @@ class HemoAgent:
         # 2. Agrégation des outils
         self.all_tools = tools + [medical_knowledge_retrieval]
 
-        # 3. Prompt Systémique de Grade Médical
+        # 3. Prompt 
         self.prompt = ChatPromptTemplate.from_messages([
             ("system", """Tu es 'Hémo-Expert', l'assistant d'aide à la décision clinique.
-            
             DIRECTIVES CRUCIALES :
             - CALCULS : N'effectue JAMAIS de calcul mental. Utilise les outils de calcul dédiés. 
             - SOURCE : Si une information provient d'un document, cite toujours [Source: Nom, Page].
@@ -57,7 +53,7 @@ class HemoAgent:
             MessagesPlaceholder(variable_name="agent_scratchpad"),
         ])
 
-        # 4. Initialisation de l'Agent
+        # 4. Initialisation 
         agent = create_openai_tools_agent(self.llm, self.all_tools, self.prompt)
         
         # 5. Exécuteur de l'Agent

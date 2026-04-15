@@ -2,9 +2,9 @@
 
 ## 📖 Résumé du Projet
 
-**Hémo-Assit Pro** est une solution d'intelligence artificielle de pointe conçue pour assister les cliniciens en onco-hématologie. Face à la complexité croissante des protocoles de chimiothérapie et à la densité des recommandations (SFH, HAS), cet outil offre un support cognitif permettant de sécuriser les dosages et d'accéder instantanément aux référentiels de soins.
+**Hémo-Assit Pro** est une solution d'intelligence artificielle conçue pour assister les cliniciens en onco-hématologie. Face à la complexité croissante des protocoles de chimiothérapie et à la densité des recommandations (SFH, HAS), cet outil offre un support cognitif permettant de sécuriser les dosages et d'accéder instantanément aux référentiels de soins.
 
-> **Impact Clinique :** Réduction du risque temps de recherche grâce à un double contrôle automatisé (Calculateurs + RAG) et une navigation facilitée dans les protocoles de première et deuxième ligne.
+> **Impact Clinique :** Réduction du risque temps de recherche grâce à un double contrôle automatisé (Calculateurs + RAG) et une navigation facilitée dans les protocoles et recommandations.
 
 -----
 
@@ -13,7 +13,7 @@
   * **Orchestration IA :** `LangChain` (Agents autonomes & Router sémantique).
   * **Modèles de Langage :** `OpenAI GPT-4o` (Raisonnement médical complexe).
   * **Vector Database :** `ChromaDB` (Stockage et recherche sémantique des protocoles).
-  * **Recherche Web :** `Tavily API` & `DuckDuckGo` (Veille sur les actualités et ruptures de stocks).
+  * **Recherche Web :** `Tavily API` & `DuckDuckGo` (Veille sur les actualités et ruptures de stocks, recherche).
   * **Interface Utilisateur :** `Chainlit` (Dashboard asynchrone pour une interaction fluide).
   * **Calculs Médicaux :** `Math` & `Pylatexenc` (Rendu LaTeX des formules BSA et Cockcroft-Gault).
 
@@ -29,8 +29,8 @@ Le projet utilise une architecture agentique modulaire permettant une séparatio
 ├── data/                 # Référentiels médicaux (PDF HAS, SFH)
 ├── memory_sessions/      # Persistance des historiques patients (JSON)
 ├── vectorstore/          # Index vectoriel ChromaDB (Persistant)
-├── src/                  # Logique Coeur
-│   ├── agent_supervisor.py # Orchestrateur de haut niveau
+├── src/                  
+│   ├── agent_supervisor.py # Orchestrateur 
 │   ├── query_engine.py     # Moteur RAG & Expansion de requêtes
 │   ├── router.py           # Routeur sémantique (Document vs Tool)
 │   ├── tools.py            # Outils cliniques (Calculs, Web, Todo)
@@ -44,14 +44,6 @@ Le projet utilise une architecture agentique modulaire permettant une séparatio
 -----
 
 ## 🚀 Installation et Utilisation
-
-### 🐳 Mode Docker (Recommandé)
-
-```bash
-docker-compose up --build
-```
-
-### 🐍 Installation Manuelle
 
 ```bash
 # 1. Préparer l'environnement
@@ -76,8 +68,7 @@ Le système ne se contente pas de répondre, il **agit** selon les besoins du cl
 
 1.  **RAG de Précision :** Recherche dans les PDF avec extension de requête pour les acronymes (LAL, LLC, Myélome).
 2.  **Chaînage Logique :** Calcul du BSA $\rightarrow$ Recherche de dose $\rightarrow$ Rapport de synthèse.
-3.  **Ingestion Flash :** Possibilité d'ajouter un compte-rendu patient en cours de session (Bouton Trombone) pour une analyse immédiate.
-4.  **Sécurité des Données :** Mémoire locale persistante permettant de reprendre une discussion après interruption.
+3.  **Sécurité des Données :** Mémoire locale persistante.
 
 -----
 
@@ -85,14 +76,14 @@ Le système ne se contente pas de répondre, il **agit** selon les besoins du cl
 
 Chaque module est conçu pour garantir la fiabilité des informations :
 
-  * **Zéro Hallucination :** Le routeur force l'usage du RAG ou des outils pour les données critiques.
+  * **Eviter des hallucinations :** Le routeur force l'usage du RAG ou des outils pour les données critiques.
   * **Transparence :** Chaque réponse documentaire est accompagnée de ses sources précises.
 
 -----
 
 ## ⚠️ Disclaimer Médical
 
-Cet outil est un **dispositif d'assistance à la décision** destiné aux professionnels de santé. Les prédictions et calculs doivent impérativement être validés par un médecin avant toute application clinique. L'exactitude dépend de la qualité des documents indexés dans le dossier `data/`.
+Cet outil est un **dispositif d'assistance à la décision** destiné aux professionnels de santé. Les prédictions et calculs doivent impérativement être validés  avant toute application clinique.
 
 -----
 

@@ -23,11 +23,10 @@ class RAGEngine:
         )
         
         if not os.path.exists(CONFIG.VECTORSTORE_PATH):
-            # Si la base n'existe pas, on la crée vide plutôt que de planter
             os.makedirs(CONFIG.VECTORSTORE_PATH, exist_ok=True)
-            logger_info = "Base vectorielle créée (vide)."
+            logger_info = "Base vectorielle créée (vide)." # creer une base vide si elle n'existe pas
         else:
-            logger_info = "Base vectorielle chargée."
+            logger_info = "Base vectorielle chargée." 
         
         self.vectorstore = Chroma(
             persist_directory=CONFIG.VECTORSTORE_PATH,
@@ -40,7 +39,7 @@ class RAGEngine:
             api_key=CONFIG.OPENAI_API_KEY
         )
 
-        # 1. Prompt d'expansion médicale (Optimisé pour l'onco-hématologie)
+        # 1. Prompt d'expansion médicale 
         QUERY_PROMPT = PromptTemplate(
             input_variables=["question"],
             template="""Tu es un expert en hématologie. 
@@ -96,7 +95,7 @@ Réponse experte :""")
         
         if not docs:
             return {
-                "answer": "Le référentiel local est muet sur ce sujet. Souhaitez-vous une recherche sur internet ?",
+                "answer": "Malheuresement je n'ai pu trouvé aucune information locale sur ce sujet. Souhaitez-vous une recherche sur internet ?",
                 "citations": [],
                 "sources": []
             }
@@ -134,14 +133,14 @@ Réponse experte :""")
             loader = PyPDFLoader(file_path)
             documents = loader.load()
             
-            # 2. Split (On utilise les mêmes réglages que l'ingestion globale)
+            # 2. Split avec chevauchement
             text_splitter = RecursiveCharacterTextSplitter(
                 chunk_size=CONFIG.CHUNK_SIZE,
                 chunk_overlap=CONFIG.CHUNK_OVERLAP
             )
             chunks = text_splitter.split_documents(documents)
             
-            # 3. Enrichissement des métadonnées (optionnel mais recommandé)
+            # 3. Enrichissement des métadonnées 
             for chunk in chunks:
                 chunk.metadata["source"] = self._clean_source_name(file_path)
                 chunk.metadata["doc_type"] = ".pdf"
