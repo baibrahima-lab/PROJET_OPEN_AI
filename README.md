@@ -1,6 +1,9 @@
 
 # 🩸 Hémo-Expert : Assistant d'Aide à la Décision en Onco-Hématologie
 
+https://hemo-expert-assit.onrender.com
+
+
 ## 📖 Résumé du Projet
 
 **Hémo-Assit Pro** est une solution d'intelligence artificielle conçue pour assister les cliniciens en onco-hématologie. Face à la complexité croissante des protocoles de chimiothérapie et à la densité des recommandations (SFH, HAS), cet outil offre un support cognitif permettant de sécuriser les dosages et d'accéder instantanément aux référentiels de soins.
